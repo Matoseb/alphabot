@@ -343,8 +343,6 @@
 					let maxHeight = this.container.offsetHeight;
 					let amt = height/maxHeight;
 
-					console.log(amt);
-
 					this.container.style.opacity = UTILS.map(amt, 0, 0.5, 1, 0);
 				}
 
@@ -788,7 +786,6 @@
 
         	document.body.addEventListener('scroll', function(evt) {
         		HEADER.update();
-        		console.log('hey');
         	});
 
         	window.addEventListener('resize', function(evt) {
