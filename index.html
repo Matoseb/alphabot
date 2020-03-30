@@ -127,8 +127,11 @@
 		}
 
 		.abc-letter {
-			cursor: pointer;
 			position: relative;
+		}
+
+		.abc-letter.interactive {
+			cursor: pointer;
 		}
 
 		.abc-letter:hover>.abc-sprite {
@@ -707,6 +710,7 @@
         			let clone = model.cloneNode(true);
         			clone.firstElementChild.style.backgroundImage = `url(${char.path})`;
         			clone.classList.add(charName);
+        			clone.classList.add('interactive');
         			fragment.appendChild(clone);
         		}
 
