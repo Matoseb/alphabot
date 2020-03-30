@@ -570,7 +570,7 @@
 
             		case 'Enter':
                     // this.moveCursor(1);
-
+                    evt.preventDefault();
                     break;
 
                     case ' ':
@@ -582,10 +582,9 @@
                     break;
 
                     case 'Backspace':
-
+                    evt.preventDefault();
                     this.deleteChar();
                     this.moveCursor(-1);
-
                     VIZ.setCursor(this.start);
 
                     break;
