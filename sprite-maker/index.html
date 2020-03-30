@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bot Alphabet — Sprite maker</title>
+	<style type="text/css">
+		
+		canvas {
+			
+			background-color: white;
+			--color2: lightgray;
+
+			background-image: linear-gradient(45deg, var(--color2) 25%, transparent 25%), linear-gradient(-45deg, var(--color2) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--color2) 75%), linear-gradient(-45deg, transparent 75%, var(--color2) 75%);
+			background-size: 20px 20px;
+			background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+		}
+
+	</style>
+
+	<section id="main-container">
+		<form action="" id="sprite-form">
+			<input name="sprite-load" type="file" multiple accept="image/x-png,image/jpeg" >
+			<input name="sprite-download" type="button" disabled="true" value="Download">
+			<input name="sprite-clear" type="button" disabled="true" value="Clear">
+			<br>
+			<label for="sprite-vertical">Vertical</label>
+			<input type="radio" id="sprite-vertical" name="sprite-way" value="Rows">
+			<br>
+			<label for="sprite-horizontal">Horizontal</label>
+			<input type="radio" id="sprite-horizontal" name="sprite-way" value="Columns" checked>
+			<br>
+			<label for="sprite-repeat">Columns</label>
+			<input name="sprite-repeat" type="number" value="5" min="1">
+		</form> 
+		<canvas id="sprite-result" width="0" height="0"></canvas>
+	</section>
+
+</head>
+<body>
+	<script type="text/javascript">
+		'use strict';
+
+		window.addEventListener('load', function() {
+
+			const DOM = {
+				//form
+				mainContainer: "#main-container",
+				spriteForm: "#sprite-form",
+				spriteLoad: "input[name='sprite-load']",
+				spriteDownload: "input[name='sprite-download']",
+				spriteClear: "input[name='sprite-clear']",
+				spriteVertical: "#sprite-vertical",
+				spriteHorizontal: "#sprite-horizontal",
+				spriteRepeatLabel: "[for='sprite-repeat']",
+				spriteRepeat: "input[name='sprite-repeat']",
+				//canvas
+				canvas: "#sprite-result",
+			}
+
+			const UTILS = {
+				getCommonSuffix: function(arr){
+					var arr= arr.concat().sort(),
+					a1= arr[0], a2= arr[arr.length-1], L= a1.length, i= 0;
+					while(i< L && a1.charAt(i)=== a2.charAt(i)) i++;
+					return a1.substring(0, i);
+				}
+			}
+
+			for (const keyName in DOM) {
+				const selector = DOM[keyName];
+				DOM[keyName] = document.querySelector(selector);
+			}
+
+			const IMAGES = [];
+			const IMAGES_KEYS = [];
+
+			const SPRITE = {
+				way: null,
+				repeat: 1,
+			}
+			
+			const C = DOM.canvas.getContext('2d');
+
+			DOM.spriteLoad.addEventListener('change', (evt) => {
+				spriteLoad(evt);
+			});
+
+			DOM.spriteForm.addEventListener('submit', (evt) => {
+				evt.preventDefault();
+			})
+
+			DOM.spriteClear.addEventListener('click', (evt) => {
+				spriteClear();
+			});
+
+			DOM.spriteHorizontal.addEventListener('click', () => {
+				setSpriteWay();
+				renderCanvas();
+			});
+
+			DOM.spriteVertical.addEventListener('click', () => {
+				setSpriteWay();
+				renderCanvas();
+			});
+
+			DOM.spriteRepeat.addEventListener('change', (evt) => {
+				setSpriteRepeat();
+				renderCanvas();
+				evt.target.blur();
+			});
+
+			DOM.spriteDownload.addEventListener('click', (evt) => {
+				downloadSprite();
+			});
+
+			setSpriteWay();
+			setSpriteRepeat();
+
+			function downloadSprite() {
+
+
+				const suffix = UTILS.getCommonSuffix(IMAGES_KEYS).replace(/\d+$/, "");
+
+				const link = document.createElement('a');
+				link.download = `${suffix}_c-${SPRITE.columns}_r-${SPRITE.rows}_n-${IMAGES.length}.png`;
+				link.href = DOM.canvas.toDataURL();
+				link.click();
+			}
+
+			function setSpriteWay() {
+
+				let mode = DOM.spriteVertical.value;
+
+				if(DOM.spriteHorizontal.checked) {
+					mode = DOM.spriteHorizontal.value;
+				}
+
+				SPRITE.way = mode;
+				DOM.spriteRepeatLabel.innerText = SPRITE.way;
+			}
+
+			function setSpriteRepeat() {
+				SPRITE.repeat = parseInt(DOM.spriteRepeat.value);
+			}
+
+			function spriteLoad(evt) {
+
+				spriteClear();
+
+				const files = evt.target.files;
+				const promises = [];
+
+				for (let file of files) {
+					IMAGES_KEYS.push(file.name);
+					promises.push(loadImage(file));
+				}
+
+				Promise.all(promises).then(function(images) {
+					IMAGES.push(...images);
+					reorderImages();
+					renderCanvas();
+				});
+			}
+
+			function reorderImages() {
+				const all = [];
+
+				for (let i = 0; i < IMAGES_KEYS.length; i++) {
+					all.push({ 'A': IMAGES_KEYS[i], 'B': IMAGES[i] });
+				}
+
+				all.sort(function(a, b) {
+					return a.A - b.A;
+				});
+
+				IMAGES_KEYS.length = IMAGES.length = 0;
+
+				for (let curr of all) {
+					IMAGES_KEYS.push(curr.A);
+					IMAGES.push(curr.B);
+				}
+
+			}
+
+			function renderCanvas() {
+
+				if(!IMAGES.length)
+					return;
+				
+				const imgWidth = IMAGES[0].width;
+				const imgHeight = IMAGES[0].height;
+
+				const fit = Math.ceil(IMAGES.length/SPRITE.repeat);
+				const repeat = Math.min(IMAGES.length, SPRITE.repeat);
+
+				// console.log(img);
+				let rows, columns;
+
+				switch(SPRITE.way) {
+					case 'Rows':
+					rows = repeat
+					columns = fit;
+					break;
+					case 'Columns':
+					columns = repeat;
+					rows = fit;
+					break;
+				}
+
+				console.log(columns, rows);
+
+				SPRITE.columns = columns;
+				SPRITE.rows = rows;
+
+				C.canvas.width = columns * imgWidth;
+				C.canvas.height = rows * imgHeight;
+				C.clearRect(0,0,C.canvas.width, C.canvas.height);
+
+				C.save();
+
+				let i = 0;
+				for (let xIndex = 0; xIndex < rows; xIndex++) {
+					for (let yIndex = 0; yIndex < columns; yIndex++) {
+						let currImage = IMAGES[i];
+						if(currImage)
+							C.drawImage(currImage, yIndex * imgWidth, xIndex * imgHeight);
+						i++;
+					}
+				}
+
+				C.restore();
+
+				DOM.spriteClear.disabled = DOM.spriteDownload.disabled = false;
+			}
+
+			function spriteClear() {
+				DOM.spriteClear.disabled = DOM.spriteDownload.disabled = true;
+
+				C.canvas.width = C.canvas.height = 0;
+
+				IMAGES.length = IMAGES_KEYS.length = 0;
+			}
+
+			function loadImage(file) {
+				return new Promise((resolve, reject) => {
+
+					const image = new Image();
+					const reader = new FileReader();
+
+					image.addEventListener('load', function() {
+						resolve(image);
+					});
+
+					reader.addEventListener('load', function () {
+						image.src = this.result;
+					}, false);
+
+					reader.readAsDataURL(file);
+
+					return image;	
+				});
+			}
+		});
+
+
+
+
+	</script>
+
+</body>
+</html>
