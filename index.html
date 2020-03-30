@@ -38,13 +38,11 @@
 		}
 
 		.info-container {
-			opacity: 0;
 			display: flex;
 			flex-direction: column;
 			height: auto;
 			padding: 0 var(--margin) 0 var(--margin);
-			transition: opacity 0.1s ease-in;
-			position: absolute;
+			position: relative;
 			box-sizing: padding-box;
 			width: auto;
 			color: white;
@@ -58,7 +56,7 @@
 			text-decoration: underline;
 		}
 
-		.abc-cursor::after {
+		.abc-container:not(.blurred) .abc-cursor::after {
 			cursor: pointer;
 			position: absolute;
 			content: '';
@@ -68,6 +66,10 @@
 			width: 1px;
 			background: white;
 			animation: 1.2s blink step-end infinite;
+		}
+
+		.abc-message {
+			color: white;
 		}
 
 		.abc-container {
@@ -95,9 +97,9 @@
 		.abc-loading_bar {
 			z-index: 10;
 			--progress: 0;
-			width: 30%;
-			max-width: 200px;
-			height: 10px;
+			width: 60%;
+			max-width: 400px;
+			height: 15px;
 			position: relative;
 			box-shadow: inset 0 0 0 1px white;
 		}
@@ -122,7 +124,7 @@
 			will-change: background-position;
 			background-repeat: no-repeat;
 			transform-origin: bottom center;
-			transition: transform 0.1s ease-out;
+			transition: transform 0.08s ease-out;
 			background-position: 0 0;
 		}
 
@@ -135,7 +137,7 @@
 		}
 
 		.abc-letter:hover>.abc-sprite {
-			transform: scale3d(1.05, 1.05, 1);
+			transform: scale3d(1.04, 1.04, 1);
 		}
 
 		.abc-letter::before {
@@ -182,7 +184,8 @@
 	<section class="abc-container hidden">
 	</section>
 	<section class="fill-background">
-		<div class="abc-loading_bar"></div>
+		<div class="abc-loading_bar hidden"></div>
+		<div class="abc-message hidden">No mobile version yet</div>
 	</section>
 	<section class="abc-templates">
 		<div class="abc-letter">
@@ -209,6 +212,11 @@
 			}
 
 			const UTILS = {
+
+				isMobile: function() {
+					return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent);
+				},
+
 				loadImage: function(path) {
 					return new Promise((resolve, reject) => {
 						const img = new Image();
@@ -296,236 +304,243 @@
 			const INFOS = {
 				container: null,
 				collapsed: null,
+				height: 0,
+
+
 				init() {
 					this.container = DOM.infoContainer;
 					this.collapsed = DOM.infoCollapsed;
 				},
 
-				wheel(evt) {
+				setScrollY(y) {
+					this.collapse(y);
+				},
 
-					// if(window.scrollY !== 0)
-						// return;
+				resize() {
+					this.deltaY = 0;
+					this.collapse();					
+				},
 
-						this.collapse(evt.deltaY);
-					},
+				collapse(deltaY = 0) {
+					
+					let maxHeight = this.container.getBoundingClientRect().height;
 
-					resize() {
-						this.collapse(0);					
-					},
+					this.height -= deltaY;
+					this.height = Math.min(Math.max(this.height, 0), maxHeight);
 
-					collapse(delta = 0) {
-						let height = this.collapsed.getBoundingClientRect().height;
-						let maxHeight = this.container.getBoundingClientRect().height;
+					let amt = this.height/maxHeight;
 
-						height -= delta;
-						height = Math.min(Math.max(height, 0), maxHeight);
-
-
-						let amt = height/maxHeight;
-
-						this.container.style.opacity = UTILS.map(amt, 0.4, 1, 0, 1);
-						this.collapsed.style.height = `${height}px`;
-					},
+					this.container.style.opacity = UTILS.map(amt, 0.4, 1, 0, 1);
+					this.collapsed.style.height = `${this.height}px`;
+				},
 
 
-				}
+			}
 
-				const VIZ = {
+			const VIZ = {
 
-					container: DOM.abcContainer,
-					width: 0,
-					height: 0,
-					nColumns: 6,
+				container: DOM.abcContainer,
+				width: 0,
+				height: 0,
+				nColumns: 6,
 
-					init() {
+				focus() {
+					this.container.classList.remove('blurred');
+				},
 
-						this.setColumns();
-						this.container.classList.remove('hidden');
-						let cursorNode = this.addSpace('',0);
-						this.setCursor(0);
+				blur() {
+					this.container.classList.add('blurred');
+				},
 
-						this.getDims();
-					},
+				init() {
 
+					this.setColumns();
+					this.container.classList.remove('hidden');
+					let cursorNode = this.addSpace('',0);
+					this.setCursor(0);
 
-					click(evt) {
-
-						let elem = UTILS.hasParentWithSelector(evt.target, '.abc-container .abc-letter');
-
-						if(!elem)
-							return;
-
-						let node = UTILS.findByValue(TXT.area, 'elem', elem);
-
-						if(!node)
-							return;
-
-						node.clicked = true;
-					},
+					this.getDims();
+				},
 
 
+				click(evt) {
 
-					animateNode(node) {
+					let elem = UTILS.hasParentWithSelector(evt.target, '.abc-container .abc-letter');
 
-						let now = performance.now();
-						let elapsed = now - node.time;
+					if(!elem)
+						return;
 
-						node.visible = UTILS.isInViewport(node.elem);
+					let node = UTILS.findByValue(TXT.area, 'elem', elem);
 
-						if (!node.visible) {
-							return;
+					if(!node)
+						return;
+
+					node.clicked = true;
+				},
+
+
+
+				animateNode(node) {
+
+					let now = performance.now();
+					let elapsed = now - node.time;
+
+					node.visible = UTILS.isInViewport(node.elem);
+
+					if (!node.visible) {
+						return;
+					}
+
+					if (elapsed > node.delay) {
+						this.updateNode(node);
+						this.updateState(node);
+						node.time = now - (elapsed % node.delay);
+					}
+
+				},
+
+				updateState(node) {
+					this[`state_${node.state}`](node);
+				},
+
+				state_start(node) {
+					node.iFrame++;
+
+					if(node.iFrame >= node.loopStart)
+						node.state = 'loop';
+				},
+
+				state_loop(node) {
+					node.iFrame++;
+
+					if(node.iFrame > node.loopEnd) {
+						if(node.clicked) {
+							node.state = 'end';
+							node.clicked = false;
+						} else {
+							node.iFrame = node.loopStart;	
 						}
+					}	
+				},
 
-						if (elapsed > node.delay) {
-							this.updateNode(node);
-							this.updateState(node);
-							node.time = now - (elapsed % node.delay);
-						}
+				state_end(node) {
+					node.iFrame++;
 
-					},
-
-					updateState(node) {
-						this[`state_${node.state}`](node);
-					},
-
-					state_start(node) {
-						node.iFrame++;
-
-						if(node.iFrame >= node.loopStart)
-							node.state = 'loop';
-					},
-
-					state_loop(node) {
-						node.iFrame++;
-
-						if(node.iFrame > node.loopEnd) {
-							if(node.clicked) {
-								node.state = 'end';
-								node.clicked = false;
-							} else {
-								node.iFrame = node.loopStart;	
-							}
-						}	
-					},
-
-					state_end(node) {
-						node.iFrame++;
-
-						if(node.iFrame >= node.nFrames) {
-							node.iFrame = node.nFrames;
-							if(node.clicked) {
-								node.iFrame = 0;
-								node.state = 'start';
-								node.clicked = false;
-							}
-						}
-					},
-
-					getDims() {
-						const node = this.container.querySelector('.abc-letter');
-						const rect = node.getBoundingClientRect();
-						this.width = rect.width;
-						this.height = rect.height;
-					},
-
-
-					setColumns() {
-						this.nColumns = Math.ceil(window.innerWidth / 200);
-
-						this.nColumns = Math.min(this.nColumns, 8);
-
-						document.documentElement.style.setProperty('--columns', this.nColumns);
-					},
-
-					setCursor(position) {
-						let oldElem = this.container.querySelector('.abc-cursor');
-						if(oldElem)
-							oldElem.classList.remove('abc-cursor');
-
-						let newElem = this.container.children[position];
-
-						newElem.classList.add('abc-cursor');
-
-						if(!UTILS.isInViewport(newElem)) {
-							newElem.scrollIntoView({behavior: "smooth"});
-						}
-					},
-
-					addChar(char, position) {
-						let elem = document.querySelector(`.abc-preload .${char}`).cloneNode(true);
-						let node = this.buildNode(position, { char , elem});
-
-						return node;
-					},
-
-					addSpace(char, position) {
-						return this.buildNode(position, { char });
-					},
-
-					newLine(char, position) {
-						return this.buildNode(position, { char });
-					},
-
-					updateNode(node) {
-
-						let frame = node.iFrame;
-						let cols = (node.columns);
-						let x = frame % cols;
-						let y = ~~(frame / cols);
-
-						node.spriteElem.style.backgroundPosition =
-						`${x/(cols-1) * 100}% ${y/(node.rows-1) * 100}%`;
-					},
-
-					buildNode(position, options) {
-
-						const defaults = {
-							state: 'start',
-							clicked: false,
-							char: null,
-							elem: DOM.abcLetterTemplate.cloneNode(true),
-							delay: 1000 / FPS,
-							time: performance.now(),
-						};
-
-						const node = Object.assign({}, defaults, options);
-
-						let charProps = CHARS[node.char];
-
-						node.spriteElem = node.elem.firstElementChild;
-
-						if (charProps) {
-
-							node.nFrames = charProps.N;
-							node.rows = charProps.R;
-							node.columns = charProps.C;
+					if(node.iFrame >= node.nFrames) {
+						node.iFrame = node.nFrames;
+						if(node.clicked) {
 							node.iFrame = 0;
-							[node.loopStart, node.loopEnd] = charProps.L;
-
-							node.spriteElem.style.backgroundSize = `${100*charProps.C}%`;
+							node.state = 'start';
+							node.clicked = false;
 						}
+					}
+				},
 
-						this.container.insertBefore(node.elem, this.container.children[position]);
+				getDims() {
+					const node = this.container.querySelector('.abc-letter');
+					const rect = node.getBoundingClientRect();
+					this.width = rect.width;
+					this.height = rect.height;
+				},
 
-						return node;
-					},
 
-					removeNode(node) {
-						const elem = node.elem;
-						return elem.parentElement.removeChild(elem);
-					},
+				setColumns() {
+					this.nColumns = Math.ceil(window.innerWidth / 200);
 
-				}
+					this.nColumns = Math.min(this.nColumns, 8);
 
-				const TXT = {
-					value: '',
-					area: [],
+					document.documentElement.style.setProperty('--columns', this.nColumns);
+				},
+
+				setCursor(position) {
+					let oldElem = this.container.querySelector('.abc-cursor');
+					if(oldElem)
+						oldElem.classList.remove('abc-cursor');
+
+					let newElem = this.container.children[position];
+
+					newElem.classList.add('abc-cursor');
+
+					if(!UTILS.isInViewport(newElem)) {
+						newElem.scrollIntoView({behavior: "smooth"});
+					}
+				},
+
+				addChar(char, position) {
+					let elem = document.querySelector(`.abc-preload .${char}`).cloneNode(true);
+					let node = this.buildNode(position, { char , elem});
+
+					return node;
+				},
+
+				addSpace(char, position) {
+					return this.buildNode(position, { char });
+				},
+
+				newLine(char, position) {
+					return this.buildNode(position, { char });
+				},
+
+				updateNode(node) {
+
+					let frame = node.iFrame;
+					let cols = (node.columns);
+					let x = frame % cols;
+					let y = ~~(frame / cols);
+
+					node.spriteElem.style.backgroundPosition =
+					`${x/(cols-1) * 100}% ${y/(node.rows-1) * 100}%`;
+				},
+
+				buildNode(position, options) {
+
+					const defaults = {
+						state: 'start',
+						clicked: false,
+						char: null,
+						elem: DOM.abcLetterTemplate.cloneNode(true),
+						delay: 1000 / FPS,
+						time: performance.now(),
+					};
+
+					const node = Object.assign({}, defaults, options);
+
+					let charProps = CHARS[node.char];
+
+					node.spriteElem = node.elem.firstElementChild;
+
+					if (charProps) {
+
+						node.nFrames = charProps.N;
+						node.rows = charProps.R;
+						node.columns = charProps.C;
+						node.iFrame = 0;
+						[node.loopStart, node.loopEnd] = charProps.L;
+
+						node.spriteElem.style.backgroundSize = `${100*charProps.C}%`;
+					}
+
+					this.container.insertBefore(node.elem, this.container.children[position]);
+
+					return node;
+				},
+
+				removeNode(node) {
+					const elem = node.elem;
+					return elem.parentElement.removeChild(elem);
+				},
+
+			}
+
+			const TXT = {
+				value: '',
+				area: [],
             start: 0, //text cursor position
             selection: 0,
 
             keydown(key, evt) {
 
-            	console.log(key);
+
             	let node;
 
             	switch (key) {
@@ -568,12 +583,10 @@
                     break;
 
                     case 'Backspace':
-                    console.log('fuck');
 
                     this.deleteChar();
                     this.moveCursor(-1);
 
-                    console.log(this.start);
                     VIZ.setCursor(this.start);
 
                     break;
@@ -678,9 +691,19 @@
         	nLoaded: 0,
         	status: 0,
         	loadingBar: document.querySelector('.abc-loading_bar'),
+        	message: document.querySelector('.abc-message'),
 
         	async init(folder_path) {
         		
+        		
+
+        		if(UTILS.isMobile()) {
+        			this.message.classList.remove('hidden');
+        			return new Promise(() => {});
+        		} else {
+        			this.loadingBar.classList.remove('hidden');
+        		}
+
         		await this.preloadSprites(folder_path);
 
         		let time = performance.now() - 400;
@@ -728,12 +751,9 @@
         	}
         }
 
-        window.addEventListener('resize', function(evt) {
-        	VIZ.getDims();
-        	VIZ.setColumns();
-        	INFOS.resize(evt);
-        });
+        
 
+        const DELTA = 0;
 
         async function init() {
         	await LOAD.init('./rsrc/sprites/');
@@ -749,8 +769,21 @@
         		VIZ.click(evt);
         	});
 
-        	document.addEventListener('wheel', function(evt) {
-        		INFOS.wheel(evt);
+        	window.addEventListener('blur', function() {
+        		VIZ.blur();
+        	});
+        	window.addEventListener('focus', function() {
+        		VIZ.focus();
+        	});
+
+        	window.addEventListener('wheel', function(evt) {
+        		INFOS.setScrollY(evt.deltaY);
+        	});
+
+        	window.addEventListener('resize', function(evt) {
+        		VIZ.getDims();
+        		VIZ.setColumns();
+        		INFOS.resize(evt);
         	});
         }
 
