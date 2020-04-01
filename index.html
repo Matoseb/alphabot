@@ -111,6 +111,7 @@
 		.abc-status {
 			position: absolute;
 			display: flex;
+			flex-direction: column;
 			align-items: center;
 			justify-content: center;
 			pointer-events: none;
@@ -122,6 +123,7 @@
 		}
 
 		.abc-loading_bar {
+			margin: 15px;
 			--progress: 0;
 			width: 60%;
 			max-width: 400px;
@@ -133,7 +135,7 @@
 		.abc-loading_bar::after {
 			transform-origin: top left;
 			transform: scaleX(var(--progress));
-			transition: transform 0.1s ease-out;
+			transition: transform 0.3s ease-in-out;
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -199,7 +201,9 @@
 	<header class="info-collapsed transparent">
 		<article class="info-container">
 			<h1><a href="javascript:window.location.reload(true)">Alphabot</a></h1>
-			<p>Semester project made during a course lead by Matthieu Minguet.<br>
+			<p>TYPE & CLICK on the letters.</p>
+			<p>
+				Semester project made during a course lead by Matthieu Minguet.<br>
 				Originally made with Processing and After Effects.
 			</p>
 			<p>
@@ -210,7 +214,7 @@
 	<section class="abc-section">
 		<div class="abc-status">
 			<div class="abc-loading_bar hidden"></div>
-			<div class="abc-message hidden">No mobile version yet :𝙸</div>
+			<div class="abc-message hidden">TYPE & CLICK on the letters.</div>
 		</div>
 		<div class="abc-container hidden"></div>
 
@@ -705,23 +709,24 @@
         	message: document.querySelector('.abc-message'),
 
         	async init(folder_path) {
-        		
-        		
 
+        		this.message.classList.remove('hidden');
+        		
         		if(UTILS.isMobile()) {
-        			this.message.classList.remove('hidden');
+        			this.message.textContent = 'No mobile version yet :𝙸';
         			return new Promise(() => {});
-        		} else {
-        			this.loadingBar.classList.remove('hidden');
         		}
+        		
+        		this.loadingBar.classList.remove('hidden');
 
         		await this.preloadSprites(folder_path);
 
-        		let time = performance.now() - 400;
+        		let time = performance.now() - 2000;
         		let delay = Math.max(Math.abs(time - performance.now()), 0);
 
         		await UTILS.delay(delay);
         		this.loadingBar.classList.add('hidden');
+        		this.message.classList.add('hidden');
         		document.body.classList.remove('lockScroll');
         	},
 
