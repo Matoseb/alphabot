@@ -348,7 +348,6 @@ window.addEventListener('load', function() {
 			const delay = Math.max(Math.abs(time - performance.now()), 0);
 			await UTILS.delay(delay);
 
-
 			await ANIM.disappear(this.bar);
 			ANIM.appear(this.msg);
 
@@ -356,7 +355,7 @@ window.addEventListener('load', function() {
 			const end = this.spriteEnded();
 
 			await clicked;
-			ANIM.disappear(this.msg);
+			this.msg.classList.add('hidden');
 			await end;
 
 			
