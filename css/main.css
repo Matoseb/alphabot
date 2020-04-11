@@ -137,7 +137,7 @@ body {
 	height: auto;
 	padding: 0 var(--margin) 0 var(--margin);
 	position: relative;
-	text-align: justify;
+	text-align: center;
 }
 
 .info-container a {
