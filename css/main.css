@@ -1,0 +1,234 @@
+:root {
+	--color1: #35363A;
+	--columns: 5;
+	--font-size: 1em;
+	--margin: 50px;
+}
+
+button {
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    overflow: visible;
+    background: transparent;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    line-height: normal;
+    -webkit-font-smoothing: inherit;
+    -moz-osx-font-smoothing: inherit;
+    -webkit-appearance: none;
+}
+
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+html, body {
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	background: black;
+	font-family: 'Martel Sans', sans-serif;
+}
+
+body {
+	position: relative;
+	overflow: hidden;
+}
+
+.enable-scroll {
+	overflow: hidden scroll;
+}
+
+
+
+.load-infos {
+	color: white;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: auto;
+	width: calc(100% / var(--columns));
+}
+
+.load-letter {
+	--columns: 1;
+	width: 100%;
+	padding-bottom: 100%;
+	height: 0;
+	margin: var(--margin);
+}
+
+.load-message {
+	outline: none;
+	position: absolute;
+	bottom: 0%;
+	white-space: nowrap;
+}
+
+.load-bar {
+	margin: 1ch;
+	position: absolute;
+	bottom: 0%;
+	left: 0;
+	width: 100%;
+	height: 3px;
+	border: 1px solid white;
+}
+
+.load-container {
+	position: fixed;
+	background: var(--color1);
+	top: 0;
+	z-index: 100;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.load-progress {
+	background: white;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	transform-origin: left center;
+	transform: scaleX(0);
+	transition: transform 0.2s 0.1s ease-out;
+}
+
+.smooth-scroll {
+	scroll-behavior: smooth;
+}
+
+.hidden {
+	opacity: 0;
+	display: none;
+}
+
+.tween {
+	transition: 0.2s all ease-out;
+}
+
+.info-collapsed {
+	display: flex;
+	justify-content: center;
+	background: black;
+	position: relative;
+	transition: opacity;
+	transition-delay: 0.3s ease-out;
+	width: 100%;
+	z-index: 10;
+}
+
+.info-container {
+	width: 100%;
+	box-sizing: padding-box;
+	color: white;
+	display: flex;
+	flex-direction: column;
+	height: auto;
+	padding: 0 var(--margin) 0 var(--margin);
+	position: relative;
+	text-align: justify;
+}
+
+.info-container a {
+	color: white;
+	text-transform: inherit;
+	/*text-decoration: none;*/
+}
+
+.info-container h1, .info-container h1 * {
+	text-decoration: none;
+}
+
+.abc-container {
+	position: relative;
+	z-index: 5;
+	width: 100%;
+	height: 100%;
+}
+
+.abc-section {
+	background: var(--color1);
+	outline: none;
+	padding: calc(var(--margin) * 0.5);
+	box-sizing: border-box;
+	position: relative;
+	height: auto;
+	min-height: 100%;
+	font-size: var(--font-size);
+	color: white;
+	resize: none;
+	width: 100%;
+	border: none;
+	transition: opacity 0.1s ease-in-out;
+}
+
+.info-button {
+	margin: 0.5em;
+	outline: none;
+	color: white;
+	position: absolute;
+	z-index: 20;
+	top: 100%;
+}
+
+.info-button:hover {
+	text-decoration: underline;
+}
+
+.abc-container {
+	position: relative;
+}
+
+.abc-section:not(:focus):hover {
+	opacity: 0.5;
+}
+
+.abc-section:not(:focus) {
+	cursor: pointer;
+	opacity: 0.2;
+}
+
+.abc-info-defocus {
+	color: white;
+	z-index: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	font-size: 1rem;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	text-align: center;
+}
+
+.abc-letter {
+	width: calc(100% / var(--columns));
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-size: 1500%;
+	border: none;
+}
+
+.animate {
+	cursor: pointer;
+}
+
+.abc-templates {
+	display: none;
+}
+
+.disabled {
+	pointer-events: none;
+}
