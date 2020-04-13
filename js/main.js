@@ -344,11 +344,11 @@ window.addEventListener('load', function() {
 				});
 			}
 
-			const time = performance.now() - 300;
+			const time = performance.now() + 300;
 
 			await Promise.all(promises);
 
-			const delay = Math.max(Math.abs(time - performance.now()), 0);
+			const delay = Math.max(time - performance.now(), 0);
 			await UTILS.delay(delay);
 
 			await ANIM.disappear(this.bar);
