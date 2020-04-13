@@ -399,7 +399,6 @@ window.addEventListener('load', function() {
 			}
 
 			this.loaded++;
-			console.log(this.progress.style.transform);
 			this.progress.style.transform = `scaleX(${this.loaded/this.total})`;
 		}
 	}
