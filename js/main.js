@@ -34,8 +34,7 @@ window.addEventListener('load', function() {
 		},
 
 		hide() {
-			const {height} = DOM.infoContainer.getBoundingClientRect();
-			this.parent.scrollTop = height;
+			this.parent.scrollTop = this.container.offsetHeight;
 			WRITER.focus();
 			document.body.classList.add('enable-scroll');
 		},

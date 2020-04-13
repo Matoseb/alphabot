@@ -252,7 +252,7 @@ body {
 }
 
 .abc-letter:active:hover {
-	opacity: 0.66;
+	opacity: 0.8;
 }
 
 .abc-letter:hover {
