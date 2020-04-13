@@ -344,7 +344,7 @@ window.addEventListener('load', function() {
 				});
 			}
 
-			const time = performance.now() + 300;
+			const time = performance.now() + 600;
 
 			await Promise.all(promises);
 
