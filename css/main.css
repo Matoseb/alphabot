@@ -5,6 +5,11 @@
 	--margin: 50px;
 }
 
+* {
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+}
+
 button {
     border: none;
     margin: 0;
@@ -65,9 +70,10 @@ body {
 }
 
 .load-message {
+	text-align: center;
 	outline: none;
 	position: absolute;
-	bottom: 0%;
+	bottom: -5%;
 	white-space: nowrap;
 }
 
@@ -79,6 +85,15 @@ body {
 	width: 100%;
 	height: 3px;
 	border: 1px solid white;
+}
+
+.load-message-text {
+	margin: 0;
+	
+}
+
+.float-anim {
+	animation: floatanim 1.5s infinite ease-in-out;
 }
 
 .load-container {
@@ -151,20 +166,21 @@ body {
 }
 
 .abc-container {
+	display: flex;
 	position: relative;
 	z-index: 5;
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
+	height: auto;
 }
 
 .abc-section {
+	flex-grow: 1;
 	background: var(--color1);
 	outline: none;
 	padding: calc(var(--margin) * 0.5);
 	box-sizing: border-box;
 	position: relative;
-	height: auto;
-	min-height: 100%;
 	font-size: var(--font-size);
 	color: white;
 	resize: none;
@@ -174,7 +190,7 @@ body {
 }
 
 .info-button {
-	margin: 0.5em;
+	padding: 0.5em;
 	outline: none;
 	color: white;
 	position: absolute;
@@ -186,32 +202,45 @@ body {
 	text-decoration: underline;
 }
 
-.abc-container {
-	position: relative;
+
+.abc-section:not(:focus) ~ .abc-info-defocus {
+	opacity: 1;
 }
 
-.abc-section:not(:focus):hover {
-	opacity: 0.5;
+.abc-section:not(:focus):hover ~ .abc-info-defocus {
+	text-decoration: underline;
 }
 
 .abc-section:not(:focus) {
 	cursor: pointer;
-	opacity: 0.2;
+	background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
 }
 
 .abc-info-defocus {
+	opacity: 0;
+	pointer-events: none;
+	margin: 0;
 	color: white;
 	z-index: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	position: fixed;
+	position: absolute;
+	z-index: 200;
 	font-size: 1rem;
 	width: 100%;
 	height: 100%;
-	top: 22%;
+	top: 0;
 	left: 0;
 	text-align: center;
+}
+
+.abc-info-sticky {
+	text-decoration: inherit;
+	box-sizing: border-box;
+	padding: 2em;
+	bottom: 0;
+	position: fixed;
 }
 
 .abc-letter {
@@ -220,6 +249,14 @@ body {
 	background-repeat: no-repeat;
 	background-size: 1500%;
 	border: none;
+}
+
+.abc-letter:active:hover {
+	opacity: 0.66;
+}
+
+.abc-letter:hover {
+	filter: drop-shadow(0 0 1px rgba(255,255,255,0.8));
 }
 
 .animate {
@@ -232,4 +269,10 @@ body {
 
 .disabled {
 	pointer-events: none;
+}
+
+@keyframes floatanim {
+	50% {
+		transform: translateY(0.2em);
+	}
 }

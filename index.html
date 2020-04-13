@@ -26,10 +26,9 @@
 	<header class="info-collapsed">
 		<article class="info-container">
 			<h1><a href="javascript:window.location.reload(true)">Alphabot</a></h1>
-			<p>Type it babe! Click on the letters for extra stuff.</p>
+			<p>Type it babe! Click on the letters to make 'em disappear in their own way.</p>
 			<p>
-				Semester project made during a course lead by Matthieu Minguet.<br>
-				Originally made with Processing and After Effects.
+				Semester project carried out as part of a course directed by Matthieu Minguet. <br>Originally done with Processing and After Effects.
 			</p>
 			<p>
 				<a href="https://github.com/Matoseb/">Sébastien Matos</a>, <a href="https://www.ecal.ch/en/100/homepage">ECAL</a> 2015.
@@ -38,17 +37,20 @@
 		<button class="info-button" tabindex="1" title="About this project">—</button>
 	</header>
 	<section class="load-container">
-		<div class="load-infos">
+		<div class="load-infos hidden">
 			<div class="load-letter"></div>
-			<div class="load-message hidden"><span>Click me!</span></div>
+			<div class="load-message hidden"><p class="load-message-text float-anim">Click dat drawing!</p></div>
 			<div class="load-bar">
 				<div class="load-progress"></div>
 			</div>
 		</div>
 	</section>
 	<section class="abc-container" tabindex="3">
-		<p class="abc-info-defocus">Click here to start typin'</p>
-		<article class="abc-section"></article>	
+		<article class="abc-section"></article>
+		<div class="abc-info-defocus">
+			<div class="abc-info-sticky float-anim">Click here to start typin'</div>	
+		</div>
+		
 	</section>
 
 	<aside class="abc-templates">

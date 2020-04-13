@@ -295,11 +295,15 @@ window.addEventListener('load', function() {
 
 		async init() {
 
+
+
 			this.progress = this.container.querySelector('.load-progress');
 			this.bar = this.container.querySelector('.load-bar');
 			this.msg = this.container.querySelector('.load-message');
 			this.letterCont = this.container.querySelector('.load-letter');
 			//load sprites
+
+			this.container.querySelector('.load-infos').classList.remove('hidden');
 
 			const promises = [];
 
@@ -403,13 +407,8 @@ window.addEventListener('load', function() {
 	const WRITER = {
 		container: DOM.abcSection,
 
-		init() {
-			document.documentElement.classList.add('smooth-scroll');
-			this.resize();
-			this.focus();
-		},
-
 		focus() {
+			document.documentElement.classList.add('smooth-scroll');
 			DOM.abcSection.focus();
 		},
 
@@ -529,20 +528,25 @@ window.addEventListener('load', function() {
 
 
 	async function init() {
+
 		document.documentElement.addEventListener('click', function(e) {
 			SPRITE.click(e);
 		});
 
 		ANIM.init();
 
+		WRITER.resize();
+
 		await LOAD.init();	
 
 		DOM.abcSection.contentEditable = "true";
 
 		HEADER.init();
-		WRITER.init();
 
 		LOAD.disappear();
+
+
+		WRITER.focus();
 
 		//addListeners
 		DOM.abcSection.addEventListener('input', function(e) {
